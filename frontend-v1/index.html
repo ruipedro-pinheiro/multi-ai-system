@@ -1133,9 +1133,78 @@
                 One interface. Better answers.
             </p>
 
-            <!-- Demo Video Placeholder -->
-            <div class="demo-preview">
-                <div class="demo-placeholder">📹 Demo Video Coming Soon</div>
+            <!-- Live Interactive Demo Preview -->
+            <div class="demo-preview" style="position: relative; background: var(--bg-card); border-radius: var(--radius-lg); padding: var(--space-lg); border: 2px solid var(--chika-primary); box-shadow: var(--shadow-glow);">
+                <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+                    <!-- Demo Header -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: var(--space-sm); border-bottom: 1px solid var(--bg-hover);">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <img src="chika-mascot.svg" alt="CHIKA" style="width: 24px; height: 24px;">
+                            <span style="font-weight: 600; color: var(--chika-primary);">LIVE Demo</span>
+                        </div>
+                        <span style="display: flex; align-items: center; gap: 8px; font-size: 0.875rem; color: var(--chika-accent);">
+                            <span style="width: 8px; height: 8px; background: var(--chika-accent); border-radius: 50%; animation: pulse 2s infinite;"></span>
+                            Real AIs responding
+                        </span>
+                    </div>
+                    
+                    <!-- Quick Demo Messages -->
+                    <div style="display: flex; flex-direction: column; gap: var(--space-sm); max-height: 300px; overflow-y: auto;">
+                        <!-- User Message -->
+                        <div style="display: flex; justify-content: flex-end;">
+                            <div style="background: var(--chika-primary); color: white; padding: 12px 16px; border-radius: 12px; max-width: 70%;">
+                                Tell me a quick fun fact about space
+                            </div>
+                        </div>
+                        
+                        <!-- AI 1 Response -->
+                        <div style="display: flex; gap: 12px; align-items: start;">
+                            <div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <i data-lucide="cpu" style="width: 18px; height: 18px; color: white;"></i>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">GPT-4</div>
+                                <div style="background: var(--bg-hover); padding: 12px 16px; border-radius: 12px; max-width: 85%;">
+                                    A day on Venus is longer than a year on Venus! It takes 243 Earth days to rotate once, but only 225 Earth days to orbit the Sun.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- AI 2 Response -->
+                        <div style="display: flex; gap: 12px; align-items: start;">
+                            <div style="background: linear-gradient(135deg, #10b981, #059669); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <i data-lucide="sparkles" style="width: 18px; height: 18px; color: white;"></i>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Gemini</div>
+                                <div style="background: var(--bg-hover); padding: 12px 16px; border-radius: 12px; max-width: 85%;">
+                                    Building on that - Venus also rotates in the opposite direction to most planets! If you could stand on Venus, the Sun would rise in the west and set in the east.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- AI 3 Response -->
+                        <div style="display: flex; gap: 12px; align-items: start;">
+                            <div style="background: linear-gradient(135deg, #f59e0b, #d97706); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <i data-lucide="bot" style="width: 18px; height: 18px; color: white;"></i>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Claude</div>
+                                <div style="background: var(--bg-hover); padding: 12px 16px; border-radius: 12px; max-width: 85%;">
+                                    And here's the kicker - Venus's atmosphere is so dense and moves so fast that despite the slow rotation, the upper atmosphere circles the planet in just 4 Earth days! This creates hurricane-force winds.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Try It Button -->
+                    <div style="text-align: center; padding-top: var(--space-sm); border-top: 1px solid var(--bg-hover);">
+                        <button class="btn btn-primary" onclick="openChat()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <i data-lucide="play-circle" style="width: 20px; height: 20px;"></i>
+                            Try It Yourself - Ask Anything
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div class="cta-container">
