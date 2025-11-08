@@ -1,353 +1,200 @@
-# 🇨🇭 CHIKA - Multi-AI Collaboration Platform
+# 🤖 CHIKA - Multi-AI Collaboration Platform
 
-> **The OS for your AIs. Stop switching. Let them collaborate.**
+**Stop switching between AIs. Let them work together.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Status](https://img.shields.io/badge/status-pre--launch-yellow)](https://ruipedro-pinheiro.github.io/CHIKA/frontend-v1/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)](https://fastapi.tiangolo.com/)
 
 ---
 
 ## 🎯 What is CHIKA?
 
-CHIKA is a multi-AI orchestration platform that makes your AIs collaborate like a real team.
+CHIKA connects multiple AI models (GPT-4, Claude, Gemini, local models) and makes them **collaborate** to give you one synthesized, high-quality answer.
 
-**Instead of:**
-- Switching between ChatGPT, Claude, Gemini
-- Copy-pasting context everywhere
-- Losing conversation history
+**The Problem:**
+- Using ChatGPT → switch tab → use Claude → copy-paste context → switch again
+- No collaboration between AIs
+- Context lost every time
+- Hallucinations not cross-checked
 
-**You get:**
-- Automatic AI selection based on your need
-- Real-time collaboration between AIs
-- Unlimited memory (never forget context)
-- Your own API keys (you keep control)
-
----
-
-## 🔥 The Problem
-
-```
-You on Claude.ai:
-"Write me a Python backup script"
-→ Claude responds ✅
-
-You on ChatGPT:
-"Is this RGPD compliant?"
-→ ChatGPT: "What script?" ❌
-→ You must copy-paste → ANNOYING!
-
-You back on Claude 2 days later:
-"Improve the script"
-→ Claude forgot (new session) ❌
-→ You must re-explain everything → TIME WASTE!
-```
-
-**You pay $40/month (Claude Pro + ChatGPT Plus) for tools that don't talk to each other.**
+**The Solution:**
+- **One question** → Multiple AIs discuss → **One best answer**
+- Context shared automatically
+- AIs review each other's responses
+- Less hallucinations, better quality
 
 ---
 
-## 💡 The Solution
+## 🚀 Live Demo
 
-```
-You: "Python backup script with crontab"
+**Try it now:** [https://ruipedro-pinheiro.github.io/CHIKA/frontend-v1/](https://ruipedro-pinheiro.github.io/CHIKA/frontend-v1/)
 
-CHIKA automatically:
-→ Analyzes: "python script" = needs CODE expert
-→ Analyzes: "crontab" = needs SYSADMIN expert
-→ Analyzes: "backup" = needs RGPD check
+**Features:**
+- ✅ Real-time AI collaboration (not a mockup!)
+- ✅ Visual status updates showing which AI is processing
+- ✅ Single synthesized answer from multiple AIs
+- ✅ Fully functional backend (SmartRouter + LLM orchestration)
 
-🤖 Claude (Code Expert):
-"I'll code it. @Gemini check RGPD? @ChatGPT creative alternatives?"
-
-✨ Gemini (Legal Expert):
-"RGPD OK if AES-256 encryption + retention <30 days"
-
-🧠 ChatGPT (Creative Expert):
-"Alternative: use systemd timer instead of cron (better logging)"
-
-🤖 Claude:
-"@You Here's your script:
-✅ Auto backup with encryption (RGPD compliant)
-✅ systemd timer (modern approach)
-Ready to use!"
-```
-
-**Result:** 1 question → 3 AIs collaborate → Best possible solution!
+**Demo Mode:**
+- Currently: GPT-4 + Ollama (local)
+- Production: GPT-4, Claude, Gemini, + any AI you connect
 
 ---
 
-## 🚀 Key Features
-
-### 🧠 SmartRouter
-Automatic AI selection based on your message:
-- "Python code bug" → Claude (code expert)
-- "RGPD compliance" → Gemini (legal expert)
-- "Creative blog post" → ChatGPT (creative expert)
-- "Script + RGPD + alternatives" → All 3 together!
-
-### 🤝 Native Collaboration
-AIs discuss together like a team:
-- Claude proposes code
-- Gemini checks security
-- ChatGPT suggests improvements
-- If disagreement → private discussion until consensus
-
-### 💾 Unlimited Memory
-**ChatGPT/Claude:** Forget after X messages
-
-**CHIKA PRO:** Never forgets!
+## 📊 Architecture
 
 ```
-Day 1: "Explain JavaScript closures"
-Day 30: "Give me closure example from before"
-→ CHIKA REMEMBERS! ✅
+┌─────────────────────────────────────────┐
+│         CHIKA Frontend (React)          │
+│  - Real-time status updates             │
+│  - Chat interface                       │
+│  - AI avatars with animations           │
+└─────────────────┬───────────────────────┘
+                  │
+                  ↓
+┌─────────────────────────────────────────┐
+│      CHIKA Backend (FastAPI)            │
+│  ┌───────────────────────────────────┐  │
+│  │  SmartRouter (Intent Analysis)    │  │
+│  └───────────────┬───────────────────┘  │
+│                  ↓                       │
+│  ┌───────────────────────────────────┐  │
+│  │  LLM Router (Multi-Provider)      │  │
+│  │  - GPT-4, Claude, Gemini          │  │
+│  │  - Ollama (local models)          │  │
+│  │  - Priority-based selection       │  │
+│  └───────────────┬───────────────────┘  │
+│                  ↓                       │
+│  ┌───────────────────────────────────┐  │
+│  │  AI Collaborator                  │  │
+│  │  - Sequential discussion          │  │
+│  │  - Context sharing                │  │
+│  │  - Synthesis into one answer      │  │
+│  └───────────────────────────────────┘  │
+└─────────────────────────────────────────┘
 ```
-
-### 🔐 You Keep Control
-**Freemium:** Our free AIs (Gemini, Llama, Mixtral)
-
-**PRO:** YOUR AIs!
-- Connect your Claude Max (OAuth)
-- Connect your ChatGPT Plus (API key)
-- Connect any AI you want
-
-**Privacy:** Your keys = your data. We don't store anything.
 
 ---
 
-## 🏗️ Architecture
+## 🛠️ Tech Stack
 
-### Backend
-```
-FastAPI (Python 3.11+)
-├── SmartRouter (intent analysis + AI selection)
-├── AICollaborator (multi-AI coordination)
-├── AI Personas (identity system - each AI knows who it is)
-├── Context Manager (unlimited memory)
-├── OAuth2 (Anthropic reverse-engineered)
-└── LiteLLM (100+ providers support)
-```
+**Frontend:**
+- HTML5 + Vanilla JS (landing page MVP)
+- Lucide Icons (professional icon library)
+- GitHub Pages (hosting)
 
-### Frontend
-```
-Vanilla JS (max performance)
-├── Zen Mode (focused conversation)
-├── Arena Mode (compare AI responses)
-├── Cards Mode (knowledge base)
-└── Settings (OAuth/API keys management)
-```
+**Backend:**
+- FastAPI (Python 3.11+)
+- LiteLLM (universal AI gateway, 100+ providers)
+- Pydantic V2 (data validation)
+- SlowAPI (rate limiting)
 
-### Infrastructure
-```
-Docker Compose
-├── FastAPI backend
-├── PostgreSQL (production) / SQLite (dev)
-├── Qdrant (vector DB for RAG - future)
-└── Nginx (reverse proxy)
-```
+**Infrastructure:**
+- Cloudflare Tunnel (public access)
+- Nohup + PID tracking (process management)
 
 ---
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Python 3.11+
-- Docker & Docker Compose
-- API keys (at least one):
-  - Google AI Studio (Gemini - free)
-  - Groq (Llama/Mixtral - free)
-  - OpenAI API key
-  - Anthropic API key
-
-### Installation
+### 1. Start Backend
 
 ```bash
-# Clone repo
-git clone https://github.com/ruipedro-pinheiro/multi-ai-system.git
-cd multi-ai-system
+# Start backend (persistent)
+/home/pedro/chika/scripts/start-backend.sh
 
-# Copy .env.example
-cp .env.example .env
+# Check status
+/home/pedro/chika/scripts/status.sh
 
-# Add your API keys in .env
-GOOGLE_API_KEY=your_key_here
-GROQ_API_KEY=your_key_here
-
-# Run with Docker
-docker-compose up -d
-
-# Or run locally
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-cd backend && uvicorn main:app --reload
+# View logs
+tail -f /tmp/chika_backend.log
 ```
 
-### Access
-- **Frontend:** http://localhost:3000
-- **Backend API:** http://localhost:8000
-- **API Docs:** http://localhost:8000/docs
+### 2. Access Demo
+
+Open: [https://ruipedro-pinheiro.github.io/CHIKA/frontend-v1/](https://ruipedro-pinheiro.github.io/CHIKA/frontend-v1/)
 
 ---
 
-## 📖 Documentation
+## 📝 Configuration
 
-- **[PITCH.md](PITCH.md)** - Full product pitch (tech + non-tech)
-- **[FREEMIUM_SETUP.md](FREEMIUM_SETUP.md)** - How to get free API keys
-- **[VALIDATION_ROADMAP.md](VALIDATION_ROADMAP.md)** - Market validation plan
-- **[RAPPORT_ANALYSE_COMPLETE.md](RAPPORT_ANALYSE_COMPLETE.md)** - Deep technical analysis
+**Environment Variables:**
 
-### Technical Docs
-- **[backend/](backend/)** - Backend architecture & code
-- **[frontend-zen/](frontend-zen/)** - Zen Mode interface
-- **[frontend-settings/](frontend-settings/)** - Settings interface
-- **[design-system/](design-system/)** - Design system & branding
+```bash
+# .env file location: /home/pedro/chika/backend/.env
+
+# Required for production
+OPENAI_API_KEY=sk-...           # GPT-4
+ANTHROPIC_API_KEY=sk-ant-...    # Claude
+GOOGLE_API_KEY=AI...            # Gemini
+
+# Optional (local models)
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama2
+```
+
+**Available AIs:**
+- GPT-4 (OpenAI) - Priority 2
+- Claude (Anthropic) - Priority 2
+- Gemini (Google) - Priority 1 (freemium)
+- Ollama (Local) - Priority 2
+- Mock (Development) - Priority 999
 
 ---
 
 ## 🎯 Roadmap
 
-### V1 (Current - Q1 2026)
-- [x] SmartRouter (intent analysis)
-- [x] Multi-AI collaboration
-- [x] Freemium support (Gemini + Groq)
-- [x] AI Personas (identity system)
-- [x] Context Manager (unlimited memory)
-- [ ] Frontend Zen Mode refactor
-- [ ] OAuth flow completion
-- [ ] Beta launch
+### ✅ Phase 0: Market Validation (CURRENT)
+- [x] Landing page with live demo
+- [x] Real AI collaboration backend
+- [x] Visual status updates
+- [x] Transparent demo disclaimer
+- [ ] Collect 10+ waitlist signups
+- [ ] Get developer feedback
 
-### V2 (Q2-Q3 2026)
-- [ ] RAG with Qdrant (upload docs/code)
-- [ ] Session management
-- [ ] TUI (terminal interface)
-- [ ] Plugins system
-- [ ] VS Code extension
+### 🚧 Phase 1: Beta Launch (December 2025)
+- [ ] User authentication
+- [ ] Session persistence
+- [ ] Waitlist backend (email storage)
+- [ ] Deploy to permanent hosting (Render/Railway)
+- [ ] Full AI roster (GPT-4, Claude, Gemini)
 
-### V3 (Q4 2026 - 2027)
-- [ ] Mobile app
-- [ ] Public API
-- [ ] Marketplace plugins
-- [ ] Enterprise features (SSO, audit logs)
+### 📅 Phase 2: Production (Q1 2026)
+- [ ] Streaming responses (SSE)
+- [ ] Context memory (Mem0 integration)
+- [ ] API for developers
+- [ ] CLI tool
+- [ ] Pricing (freemium model)
 
 ---
 
-## 💰 Pricing (Planned)
+## 📄 License
 
-### Freemium - $0
-- Gemini 2.0 Flash (free Google)
-- Llama 3.1 70B (free Groq)
-- Mixtral 8x7B (free Groq)
-- Multi-AI collaboration
-- Context limited: 50 messages
-
-### PRO - $20/month
-- Connect YOUR AIs (OAuth/API keys)
-- Unlimited memory
-- Unlimited sessions
-- Advanced settings
-- Priority support
-
-### Enterprise - Custom
-- Self-hosted (your infrastructure)
-- SSO/SAML
-- Custom branding
-- Dedicated support
-- SLA guaranteed
+MIT License - See [LICENSE](LICENSE)
 
 ---
 
 ## 🤝 Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+**We're building in public!**
 
-### Development
-
-```bash
-# Install dev dependencies
-pip install -r requirements-dev.txt
-
-# Run tests
-pytest
-
-# Code formatting
-black backend/
-isort backend/
-
-# Linting
-flake8 backend/
-mypy backend/
-```
-
----
-
-## 🔐 Security
-
-- Input sanitization (XSS, SQL injection)
-- Prompt injection protection
-- Rate limiting (10 req/min)
-- OAuth2 PKCE flow
-- Encrypted token storage
-
-Report vulnerabilities: security@chika.app
+- Report bugs: [GitHub Issues](https://github.com/ruipedro-pinheiro/CHIKA/issues)
+- Suggest features: [Discussions](https://github.com/ruipedro-pinheiro/CHIKA/discussions)
+- Join waitlist: [Landing Page](https://ruipedro-pinheiro.github.io/CHIKA/frontend-v1/)
 
 ---
 
 ## 📊 Status
 
-- **Version:** 1.0.0-beta
-- **Status:** Pre-launch validation
-- **Backend:** Production-ready
-- **Frontend:** In development
-- **Launch:** Q1 2026 (planned)
+- **Backend:** ✅ Running (persistent)
+- **Frontend:** ✅ Deployed (GitHub Pages)
+- **Demo:** ✅ Live and functional
+- **Stage:** Pre-launch validation
 
-### Current Metrics
-- GitHub Stars: 0 (just launched!)
-- Beta Users: 0 (accepting applications)
-- Waitlist: [Join here](https://chika.app)
+**Last updated:** 2025-11-08 11:10
 
 ---
 
-## 📞 Contact
-
-- **Website:** chika.app (coming soon)
-- **Email:** pedro@chika.app
-- **GitHub:** [@ruipedro-pinheiro](https://github.com/ruipedro-pinheiro)
-- **Twitter:** @chika_ai (coming soon)
-
----
-
-## ⚖️ License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
-**Core:** Open source (MIT)  
-**Enterprise:** Commercial license available
-
----
-
-## 🙏 Acknowledgments
-
-- **Anthropic** - Claude API & OAuth flow inspiration
-- **OpenAI** - ChatGPT & API design patterns
-- **Google** - Gemini 2.0 Flash (free tier ❤️)
-- **Groq** - Ultra-fast inference (free tier ❤️)
-- **LiteLLM** - Universal LLM gateway
-- **FastAPI** - Best Python web framework
-- **42 Network** - Community & feedback
-
----
-
-## 🇨🇭 Made in Switzerland
-
-**Philosophy:**
-- 🎯 Simple, no bullshit
-- 🔐 Privacy-first
-- 🛠️ Open source core
-- 💪 Self-hostable
-- 🧠 Actually intelligent (not just marketing)
-
----
-
-**CHIKA - Stop switching. Let your AIs collaborate.** 🚀
+**Made with 🧠 by collaborative AIs**
