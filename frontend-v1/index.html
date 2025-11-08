@@ -2210,3 +2210,39 @@
     </script>
 </body>
 </html>
+
+    <!-- Health Check on Load -->
+    <script>
+        // Check backend health on page load
+        async function checkBackendHealth() {
+            try {
+                const response = await fetch('https://jade-received-montreal-titans.trycloudflare.com/health', {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(5000)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Backend healthy:', data.available_ais);
+                    
+                    // Update pre-header with live status
+                    const betaBadge = document.querySelector('.beta-badge');
+                    if (betaBadge) {
+                        betaBadge.innerHTML = '✅ Live Demo Ready • Beta Dec 2025';
+                    }
+                } else {
+                    console.warn('⚠️ Backend returned', response.status);
+                }
+            } catch (error) {
+                console.warn('⚠️ Backend offline (demo will use fallback)');
+                // Don't show error to user - they'll see it when they try
+            }
+        }
+        
+        // Check on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', checkBackendHealth);
+        } else {
+            checkBackendHealth();
+        }
+    </script>
