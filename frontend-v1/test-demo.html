@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CHIKA Demo Test</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #0f172a; color: white; }
+        .container { max-width: 600px; margin: 0 auto; }
+        input { width: 100%; padding: 12px; margin: 10px 0; font-size: 16px; }
+        button { padding: 12px 24px; font-size: 16px; cursor: pointer; background: #10b981; color: white; border: none; border-radius: 8px; }
+        button:hover { background: #059669; }
+        .message { margin: 10px 0; padding: 12px; border-radius: 8px; }
+        .user { background: #6366f1; text-align: right; }
+        .ai { background: #334155; }
+        .system { background: #f59e0b; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 CHIKA Live Demo Test</h1>
+        
+        <div id="messages"></div>
+        
+        <input type="text" id="input" placeholder="Type your question...">
+        <button onclick="sendMsg()">Send</button>
+        <button onclick="testQuestion('What is AI?')">Test Question</button>
+    </div>
+    
+    <script>
+        console.log('✅ Script loaded');
+        
+        function testQuestion(q) {
+            console.log('✅ testQuestion called:', q);
+            document.getElementById('input').value = q;
+            sendMsg();
+        }
+        
+        async function sendMsg() {
+            console.log('✅ sendMsg called');
+            const input = document.getElementById('input');
+            const msg = input.value.trim();
+            
+            if (!msg) {
+                alert('Type something!');
+                return;
+            }
+            
+            console.log('📤 Sending:', msg);
+            addMsg('user', msg);
+            input.value = '';
+            
+            addMsg('system', 'Thinking...');
+            
+            try {
+                const response = await fetch('https://jade-received-montreal-titans.trycloudflare.com/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({content: msg})
+                });
+                
+                console.log('📥 Response status:', response.status);
+                
+                if (!response.ok) throw new Error('Backend error');
+                
+                const data = await response.json();
+                console.log('📥 Data:', data);
+                
+                // Clear "Thinking..."
+                document.getElementById('messages').lastChild.remove();
+                
+                // Show AI responses
+                data.ai_responses.forEach(ai => {
+                    addMsg('ai', `[${ai.ai.toUpperCase()}] ${ai.content}`);
+                });
+                
+            } catch (err) {
+                console.error('❌ Error:', err);
+                addMsg('system', '❌ Error: ' + err.message);
+            }
+        }
+        
+        function addMsg(type, text) {
+            const div = document.createElement('div');
+            div.className = 'message ' + type;
+            div.textContent = text;
+            document.getElementById('messages').appendChild(div);
+            console.log('✅ Added message:', type, text);
+        }
+        
+        console.log('✅ All functions defined');
+    </script>
+</body>
+</html>
