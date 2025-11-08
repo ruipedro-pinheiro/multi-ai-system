@@ -23,7 +23,12 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./chika.db"
     
     # CORS
-    cors_origins: Union[List[str], str] = ["http://localhost:5173", "http://localhost:3000"]
+    cors_origins: Union[List[str], str] = [
+        "http://localhost:3001",
+        "http://localhost:3000", 
+        "http://localhost:5173",
+        "https://ruipedro-pinheiro.github.io"
+    ]
     
     @field_validator('cors_origins', mode='before')
     @classmethod
