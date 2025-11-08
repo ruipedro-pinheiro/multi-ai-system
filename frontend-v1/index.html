@@ -1978,55 +1978,7 @@
 
     <!-- ==================== JAVASCRIPT ==================== -->
     <script>
-        // ========== WAITLIST FORM ==========
-        let waitlistCount = 0; // Real count from localStorage or backend
-        
-        document.getElementById('waitlist-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email-input').value;
-            
-            // TODO: Save to backend/Supabase
-            console.log('Waitlist signup:', email);
-            
-            try {
-                // Save to backend
-                const response = await fetch('https://jade-received-montreal-titans.trycloudflare.com/waitlist', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-                
-                if (response.ok) {
-                    alert('Amazing! You\'re on the list. Check your email for confirmation!');
-                    waitlistCount++;
-                    updateWaitlistCount();
-                    document.getElementById('email-input').value = '';
-                } else {
-                    throw new Error('Backend error');
-                }
-            } catch (error) {
-                // Fallback: localStorage
-                const emails = JSON.parse(localStorage.getItem('waitlist') || '[]');
-                if (!emails.includes(email)) {
-                    emails.push(email);
-                    localStorage.setItem('waitlist', JSON.stringify(emails));
-                    alert('Amazing! You\'re on the list. We\'ll email you when beta launches!');
-                    waitlistCount++;
-                    updateWaitlistCount();
-                    document.getElementById('email-input').value = '';
-                } else {
-                    alert('You\'re already on the waitlist! 🎉');
-                }
-            }
-        });
-        
-        function updateWaitlistCount() {
-            document.getElementById('waitlist-count').textContent = waitlistCount;
-            document.getElementById('header-count').textContent = waitlistCount;
-        }
-
-        // ========== CHAT DEMO ==========
-        // HERO EMBEDDED DEMO FUNCTIONS
+        // ========== DEMO FUNCTIONS (Global scope for inline onclick) ==========
         function askHeroQuestion(question) {
             document.getElementById('hero-input').value = question;
             sendHeroMessage();
@@ -2144,6 +2096,54 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
+        // ========== WAITLIST FORM ==========
+        let waitlistCount = 0; // Real count from localStorage or backend
+        
+        document.getElementById('waitlist-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email-input').value;
+            
+            // TODO: Save to backend/Supabase
+            console.log('Waitlist signup:', email);
+            
+            try {
+                // Save to backend
+                const response = await fetch('https://jade-received-montreal-titans.trycloudflare.com/waitlist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                if (response.ok) {
+                    alert('Amazing! You\'re on the list. Check your email for confirmation!');
+                    waitlistCount++;
+                    updateWaitlistCount();
+                    document.getElementById('email-input').value = '';
+                } else {
+                    throw new Error('Backend error');
+                }
+            } catch (error) {
+                // Fallback: localStorage
+                const emails = JSON.parse(localStorage.getItem('waitlist') || '[]');
+                if (!emails.includes(email)) {
+                    emails.push(email);
+                    localStorage.setItem('waitlist', JSON.stringify(emails));
+                    alert('Amazing! You\'re on the list. We\'ll email you when beta launches!');
+                    waitlistCount++;
+                    updateWaitlistCount();
+                    document.getElementById('email-input').value = '';
+                } else {
+                    alert('You\'re already on the waitlist! 🎉');
+                }
+            }
+        });
+        
+        function updateWaitlistCount() {
+            document.getElementById('waitlist-count').textContent = waitlistCount;
+            document.getElementById('header-count').textContent = waitlistCount;
+        }
+
+        // ========== OLD MODAL CHAT (UNUSED) ==========
         function closeChat() {
             document.getElementById('chat-demo').classList.remove('active');
         }
