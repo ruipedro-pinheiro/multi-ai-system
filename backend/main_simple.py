@@ -260,19 +260,19 @@ async def chat(chat_request: ChatRequest, request: Request):
 # === EMAIL HELPER === #
 
 def send_welcome_email(email: str, entry_id: int):
-    """Send welcome email via Mailgun API - BACKGROUND TASK!"""
+    """Send welcome email via Brevo API - BACKGROUND TASK!"""
     # Create NEW DB session for background task (important!)
     from database import SessionLocal
-    import requests
+    import sib_api_v3_sdk
+    from sib_api_v3_sdk.rest import ApiException
     db = SessionLocal()
     
     try:
-        # Mailgun credentials from environment
-        mailgun_api_key = os.getenv('MAILGUN_API_KEY')
-        mailgun_domain = os.getenv('MAILGUN_DOMAIN')
+        # Brevo credentials from environment
+        brevo_api_key = os.getenv('BREVO_API_KEY')
         
-        if not mailgun_api_key or not mailgun_domain:
-            print(f"⚠️ Mailgun not configured. Email not sent to {email}")
+        if not brevo_api_key:
+            print(f"⚠️ Brevo not configured. Email not sent to {email}")
             db.close()
             return
         
@@ -308,31 +308,31 @@ def send_welcome_email(email: str, entry_id: int):
         </html>
         """
         
-        # Send via Mailgun API
-        print(f"📧 Sending email to {email} via Mailgun...")
-        response = requests.post(
-            f"https://api.mailgun.net/v3/{mailgun_domain}/messages",
-            auth=("api", mailgun_api_key),
-            data={
-                "from": f"CHIKA <postmaster@{mailgun_domain}>",
-                "to": email,
-                "subject": "Welcome to CHIKA Beta! 🚀",
-                "html": html
-            },
-            timeout=10
+        # Configure Brevo API
+        configuration = sib_api_v3_sdk.Configuration()
+        configuration.api_key['api-key'] = brevo_api_key
+        api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+        
+        # Create email
+        send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+            to=[{"email": email}],
+            sender={"name": "CHIKA", "email": "noreply@chika.app"},
+            subject="Welcome to CHIKA Beta! 🚀",
+            html_content=html
         )
         
-        if response.status_code == 200:
-            print(f"✅ Welcome email sent to {email} via Mailgun")
-            
-            # Mark as sent in database
-            entry = db.query(WaitlistEntry).filter(WaitlistEntry.id == entry_id).first()
-            if entry:
-                entry.email_sent = True  # type: ignore
-                entry.email_sent_at = datetime.utcnow()  # type: ignore
-                db.commit()
-        else:
-            print(f"❌ Mailgun error: {response.status_code} - {response.text}")
+        # Send via Brevo API
+        print(f"📧 Sending email to {email} via Brevo...")
+        api_instance.send_transac_email(send_smtp_email)
+        
+        print(f"✅ Welcome email sent to {email} via Brevo")
+        
+        # Mark as sent in database
+        entry = db.query(WaitlistEntry).filter(WaitlistEntry.id == entry_id).first()
+        if entry:
+            entry.email_sent = True  # type: ignore
+            entry.email_sent_at = datetime.utcnow()  # type: ignore
+            db.commit()
         
     except Exception as e:
         print(f"❌ Email failed for {email}: {e}")
