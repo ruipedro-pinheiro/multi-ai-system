@@ -35,8 +35,31 @@ if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/
     exit 1
 fi
 
-# Check Docker permissions
+echo "✅ All prerequisites met!"
+echo ""
+
+# Clone or update
+if [ -d "$INSTALL_DIR" ]; then
+    echo "📂 Chika already installed at $INSTALL_DIR"
+    read -p "   Update to latest version? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "🔄 Updating..."
+        cd "$INSTALL_DIR"
+        git pull origin main
+    else
+        echo "⏭️  Skipping update"
+    fi
+else
+    echo "📥 Cloning Chika..."
+    git clone "$REPO_URL" "$INSTALL_DIR"
+fi
+
+cd "$INSTALL_DIR"
+
+# Check Docker permissions (MUST be after cd to correct dir)
 if ! docker ps &> /dev/null; then
+    echo ""
     echo "⚠️  Docker permission issue detected"
     
     if ! groups | grep -q docker; then
@@ -64,28 +87,6 @@ if ! docker ps &> /dev/null; then
     echo ""
     exit 0
 fi
-
-echo "✅ All prerequisites met!"
-echo ""
-
-# Clone or update
-if [ -d "$INSTALL_DIR" ]; then
-    echo "📂 Chika already installed at $INSTALL_DIR"
-    read -p "   Update to latest version? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo "🔄 Updating..."
-        cd "$INSTALL_DIR"
-        git pull origin main
-    else
-        echo "⏭️  Skipping update"
-    fi
-else
-    echo "📥 Cloning Chika..."
-    git clone "$REPO_URL" "$INSTALL_DIR"
-fi
-
-cd "$INSTALL_DIR"
 
 # Create .env if not exists
 if [ ! -f .env ]; then
