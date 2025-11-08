@@ -24,12 +24,15 @@
     <meta property="twitter:image" content="https://ruipedro-pinheiro.github.io/multi-ai-system/frontend-v1/og-image.png">
     
     <!-- Favicon -->
-    <link rel="icon" href="logo-simple.svg">
+    <link rel="icon" href="logo-icon.svg">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons (Professional Icon Library) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
         /* ==================== ROOT VARIABLES ==================== */
@@ -1116,8 +1119,8 @@
     <section class="hero">
         <div class="hero-content">
             <div class="logo-large">
-                <div class="logo-icon">
-                    <img src="logo-simple.svg" alt="CHIKA Logo" style="width: 120px; height: 120px;">
+                <div class="logo-icon" style="width: 100px; height: 100px; margin: 0 auto 24px;">
+                    <i data-lucide="network" style="width: 100px; height: 100px; color: #6366f1;"></i>
                 </div>
                 <h1>
                     Stop Switching Between AIs.<br>
@@ -1157,9 +1160,9 @@
             <div class="social-proof-content">
                 <div class="social-proof-title">Building in Public</div>
                 <div class="social-logos">
-                    <div class="social-logo" title="Open Source">🌐 Open Source</div>
-                    <div class="social-logo" title="Privacy First">🔒 Privacy First</div>
-                    <div class="social-logo" title="MIT License">📜 MIT License</div>
+                    <div class="social-logo" title="Open Source"><i data-lucide="globe" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i> Open Source</div>
+                    <div class="social-logo" title="Privacy First"><i data-lucide="shield-check" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i> Privacy First</div>
+                    <div class="social-logo" title="MIT License"><i data-lucide="file-text" style="width:16px;height:16px;display:inline-block;vertical-align:middle;"></i> MIT License</div>
                 </div>
                 <div class="github-stars">
                     ⭐ <a href="https://github.com/ruipedro-pinheiro/multi-ai-system" target="_blank" style="color: var(--chika-primary); font-weight: 600;">Follow development on GitHub</a>
@@ -1876,10 +1879,10 @@
         <div class="chat-container">
             <div class="chat-header">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <img src="logo-simple.svg" alt="CHIKA" style="width: 32px; height: 32px;">
+                    <i data-lucide="network" style="width: 24px; height: 24px; color: #6366f1;"></i>
                     <h3 style="margin: 0;">CHIKA Demo - Multi-AI Collaboration</h3>
                 </div>
-                <button class="chat-close" onclick="closeChat()">✕</button>
+                <button class="chat-close" onclick="closeChat()"><i data-lucide="x" style="width:20px;height:20px;"></i></button>
             </div>
 
             <div class="chat-messages" id="chat-messages">
@@ -2074,6 +2077,11 @@
                 }
             });
         });
+    </script>
+    
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
     </script>
 </body>
 </html>
