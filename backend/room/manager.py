@@ -159,8 +159,11 @@ class RoomManager:
         # 1. Save user message
         user_msg = self.add_user_message(room, content)
         
-        # 2. Get conversation context
-        context = self.get_conversation_context(room, limit=20)
+        # 2. Get conversation context (comme ton MCP!)
+        # FREEMIUM: 50 messages | PRO: 999999 (illimité)
+        # TODO: Check if user is PRO tier
+        context_limit = 999999  # Unlimited for now (PRO-like behavior)
+        context = self.get_conversation_context(room, limit=context_limit)
         
         # 3. Orchestrate AI collaboration
         result = await self.collaborator.process_user_message(
@@ -192,16 +195,21 @@ class RoomManager:
     def get_conversation_context(
         self,
         room: Room,
-        limit: int = 20
+        limit: int = 50
     ) -> List[Dict]:
         """Get recent conversation history for context
         
         Args:
             room: Room object
-            limit: Max number of messages
+            limit: Max number of messages (50=freemium, 999999=PRO unlimited)
         
         Returns:
             List of message dicts in OpenAI format
+        
+        Note:
+            Équivalent à ton système MCP shared-context!
+            - FREEMIUM: 50 messages (puis oublie les anciens)
+            - PRO: 999999 = pratiquement illimité (comme ton MCP)
         """
         messages = self.db.query(Message).filter(
             Message.room_id == room.id

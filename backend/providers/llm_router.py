@@ -23,20 +23,26 @@ class LLMRouter:
         self.mock = MockLLM()  # Always available fallback
     
     def _build_deployments(self) -> List[Dict]:
-        """Build list of available LLM deployments (API keys OR OAuth tokens)"""
+        """Build list of available LLM deployments (API keys OR OAuth tokens)
+        
+        Priority Strategy:
+        - PRIORITY 1: Gemini 2.0 Flash (gratuit freemium)
+        - PRIORITY 2: PRO users' configured AIs (OAuth/API keys)
+        - PRIORITY 999: Mock fallback (dev/testing)
+        """
         deployments = []
         
-        # 1. Ollama (local) - Only if configured
+        # Ollama (local) - Only if configured
         if settings.ollama_base_url and settings.ollama_model:
             deployments.append({
                 "name": "ollama",
                 "model": f"ollama/{settings.ollama_model}",
                 "api_base": settings.ollama_base_url,
-                "priority": 1,
+                "priority": 2,
                 "enabled": True
             })
         
-        # 2. Claude (API key OR OAuth)
+        # Claude (API key OR OAuth) - PRO users
         claude_key = settings.anthropic_api_key
         if not claude_key and self.token_store:
             claude_key = self.token_store.get_token("anthropic")
@@ -51,7 +57,7 @@ class LLMRouter:
                 "oauth": self.token_store and self.token_store.is_token_valid("anthropic")
             })
         
-        # 3. GPT-4 (API key OR OAuth)
+        # GPT-4 (API key OR OAuth) - PRO users
         openai_key = settings.openai_api_key
         if not openai_key and self.token_store:
             openai_key = self.token_store.get_token("openai")
@@ -61,12 +67,12 @@ class LLMRouter:
                 "name": "gpt",
                 "model": "gpt-4-turbo-preview",
                 "api_key": openai_key,
-                "priority": 3,
+                "priority": 2,
                 "enabled": True,
                 "oauth": self.token_store and self.token_store.is_token_valid("openai")
             })
         
-        # 4. Gemini (API key OR OAuth)
+        # FREEMIUM: Gemini 2.0 Flash (gratuit 1500 req/jour)
         google_key = settings.google_api_key
         if not google_key and self.token_store:
             google_key = self.token_store.get_token("google")
@@ -74,14 +80,37 @@ class LLMRouter:
         if google_key:
             deployments.append({
                 "name": "gemini",
-                "model": "gemini/gemini-pro",
+                "model": "gemini/gemini-2.0-flash-exp",
                 "api_key": google_key,
-                "priority": 4,
+                "priority": 1,
                 "enabled": True,
                 "oauth": self.token_store and self.token_store.is_token_valid("google")
             })
         
-        # 5. MOCK (ALWAYS AVAILABLE - Last fallback)
+        # FREEMIUM: Groq Llama 3.1 (gratuit 14,400 req/jour, ultra rapide)
+        groq_key = settings.groq_api_key
+        if groq_key:
+            deployments.append({
+                "name": "llama",  # SmartRouter mapping
+                "model": "groq/llama-3.1-70b-versatile",
+                "api_key": groq_key,
+                "priority": 1,
+                "enabled": True,
+                "oauth": False
+            })
+        
+        # FREEMIUM: Groq Mixtral (gratuit, créatif/multilingue)
+        if groq_key:
+            deployments.append({
+                "name": "mixtral",
+                "model": "groq/mixtral-8x7b-32768",
+                "api_key": groq_key,
+                "priority": 1,
+                "enabled": True,
+                "oauth": False
+            })
+        
+        # MOCK (ALWAYS AVAILABLE - Last fallback)
         deployments.append({
             "name": "mock",
             "model": "mock-ai",

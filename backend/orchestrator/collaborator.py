@@ -5,6 +5,8 @@ This is the CORE of Chika - makes AIs act like team members.
 from typing import List, Dict, Optional, Tuple
 import re
 from datetime import datetime
+from .smart_router import SmartRouter
+from providers.ai_personas import AIPersonas
 
 
 class AICollaborator:
@@ -258,15 +260,25 @@ If you agree with the other AI, say "I agree" and propose a final response to th
         user_message: str,
         context: List[Dict]
     ) -> str:
-        """Get response from specific AI"""
-        messages = context.copy()
-        messages.append({
+        """Get response from specific AI with proper persona/identity
+        
+        IMPORTANT: Injecte system prompt pour que chaque IA sache qui elle est!
+        """
+        # Build messages WITHOUT system prompt (context already has conversation)
+        user_messages = context.copy()
+        user_messages.append({
             'role': 'user',
             'content': user_message
         })
         
+        # Inject AI persona (system prompt) so it knows its identity
+        messages_with_persona = AIPersonas.build_messages_with_persona(
+            ai_name=ai_name,
+            user_messages=user_messages
+        )
+        
         response = await self.router.chat(
-            messages=messages,
+            messages=messages_with_persona,
             preferred_provider=ai_name,
             stream=False
         )
@@ -287,32 +299,19 @@ If you agree with the other AI, say "I agree" and propose a final response to th
     def _auto_select_ais(self, message: str, available_ais: List[str]) -> List[str]:
         """Auto-select which AIs should respond based on message
         
-        Simple heuristic:
-        - Code-related: Claude
-        - Creative: GPT
-        - Technical/Infrastructure: Gemini
-        - Default: First 2 available AIs
+        Uses SmartRouter for intelligent AI selection based on:
+        - Message intent analysis
+        - AI capability matching
+        - Client's configured AIs only (OAuth/API keys)
         """
-        message_lower = message.lower()
+        smart_router = SmartRouter()
+        selected = smart_router.select_ais(
+            message=message,
+            available_ais=available_ais,
+            max_ais=2  # Default: max 2 AIs for initial response
+        )
         
-        # Code-related keywords
-        if any(word in message_lower for word in ['code', 'function', 'bug', 'implement', 'rust', 'python']):
-            preferred = ['claude', 'gpt']
-        
-        # Creative keywords
-        elif any(word in message_lower for word in ['design', 'creative', 'write', 'story']):
-            preferred = ['gpt', 'claude']
-        
-        # Infrastructure keywords
-        elif any(word in message_lower for word in ['deploy', 'server', 'docker', 'infrastructure']):
-            preferred = ['gemini', 'claude']
-        
-        # Default: first 2 available
-        else:
-            preferred = available_ais[:2] if len(available_ais) >= 2 else available_ais
-        
-        # Filter to only available AIs
-        return [ai for ai in preferred if ai in available_ais][:2]
+        return selected
     
     def _detect_disagreement(self, response: str) -> bool:
         """Detect if AI disagrees with previous response

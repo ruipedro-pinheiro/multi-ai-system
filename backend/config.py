@@ -36,8 +36,11 @@ class Settings(BaseSettings):
     # OpenAI (Fallback) - PRIORITY 3
     openai_api_key: Optional[str] = None
     
-    # Google Gemini (Fallback) - PRIORITY 4
+    # Google Gemini (FREEMIUM - gratuit) - PRIORITY 1
     google_api_key: Optional[str] = None
+    
+    # Groq (FREEMIUM - gratuit, ultra rapide) - PRIORITY 1
+    groq_api_key: Optional[str] = None
     
     # Mem0 Memory Layer (Token Optimization)
     mem0_api_key: Optional[str] = None
