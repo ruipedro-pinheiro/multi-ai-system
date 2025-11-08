@@ -36,16 +36,16 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# CORS
-app.add_middleware(SecurityHeadersMiddleware)
+# CORS - Allow all origins for demo (Cloudflare Tunnel blocks specific origins)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=True,
+    allow_origins=["*"],  # Allow all for now - Cloudflare tunnel issue
+    allow_credentials=False,  # Must be False with allow_origins=["*"]
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type"],
+    allow_headers=["*"],
     max_age=3600
 )
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Initialize LLM Router
 llm_router = LLMRouter()
