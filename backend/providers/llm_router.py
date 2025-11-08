@@ -171,7 +171,9 @@ class LLMRouter:
                         api_base=deployment.get("api_base"),
                         api_key=api_key,
                         stream=False,
-                        timeout=120  # 120s timeout for local models (DeepSeek-R1 is slow)
+                        timeout=120,  # 120s timeout for local models (DeepSeek-R1 is slow)
+                        max_tokens=150,  # SHORT responses for landing page demo!
+                        temperature=0.7
                     )
                     return response.choices[0].message.content
             

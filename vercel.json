@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "backend/main_simple.py",
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "50mb" }
+    },
+    {
+      "src": "frontend-v1/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "backend/main_simple.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "frontend-v1/$1"
+    }
+  ],
+  "env": {
+    "RESEND_API_KEY": "@resend_api_key",
+    "OPENAI_API_KEY": "@openai_api_key",
+    "ANTHROPIC_API_KEY": "@anthropic_api_key",
+    "GEMINI_API_KEY": "@gemini_api_key"
+  }
+}

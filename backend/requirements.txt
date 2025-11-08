@@ -6,3 +6,5 @@ slowapi==0.1.9
 python-multipart==0.0.12
 litellm==1.52.8
 resend==2.19.0
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9

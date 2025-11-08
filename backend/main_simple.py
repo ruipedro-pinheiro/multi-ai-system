@@ -2,18 +2,20 @@
 
 Refacto: User → Message → Multi-AI Responses (direct!)
 """
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, validator
 from typing import Optional, List, Dict
 from datetime import datetime
-import json
+from sqlalchemy.orm import Session
 import os
-from pathlib import Path
 import resend
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+
+# Database
+from database import get_db, init_db, WaitlistEntry
 
 # Config
 from config import settings
@@ -250,25 +252,9 @@ async def chat(chat_request: ChatRequest, request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# === WAITLIST STORAGE === #
-WAITLIST_FILE = Path("/tmp/chika_waitlist.json")
+# === EMAIL HELPER === #
 
-def load_waitlist() -> List[Dict]:
-    """Load waitlist from JSON file"""
-    if not WAITLIST_FILE.exists():
-        return []
-    try:
-        with open(WAITLIST_FILE, 'r') as f:
-            return json.load(f)
-    except:
-        return []
-
-def save_waitlist(waitlist: List[Dict]):
-    """Save waitlist to JSON file"""
-    with open(WAITLIST_FILE, 'w') as f:
-        json.dump(waitlist, f, indent=2)
-
-def send_welcome_email(email: str):
+def send_welcome_email(email: str, waitlist_entry: WaitlistEntry, db: Session):
     """Send welcome email to new signup (async, non-blocking)"""
     try:
         # Get API key from environment or config
@@ -282,7 +268,7 @@ def send_welcome_email(email: str):
         resend.api_key = api_key
         
         params = {
-            "from": "CHIKA <onboarding@chika.dev>",  # TODO: Update with your domain
+            "from": "CHIKA <onboarding@resend.dev>",
             "to": [email],
             "subject": "Welcome to CHIKA Beta! 🚀",
             "html": f"""
@@ -321,6 +307,11 @@ def send_welcome_email(email: str):
         email_response = resend.Emails.send(params)
         print(f"✅ Welcome email sent to {email} (ID: {email_response['id']})")
         
+        # Mark as sent in database
+        waitlist_entry.email_sent = True
+        waitlist_entry.email_sent_at = datetime.utcnow()
+        db.commit()
+        
     except Exception as e:
         print(f"❌ Email failed for {email}: {e}")
 
@@ -328,82 +319,94 @@ def send_welcome_email(email: str):
 # === WAITLIST ROUTES === #
 
 @app.post("/waitlist", response_model=WaitlistResponse)
-@limiter.limit("5/minute")  # Max 5 signups per minute per IP (anti-spam)
-async def waitlist_signup(signup: WaitlistRequest, request: Request):
+@limiter.limit("5/minute")
+async def waitlist_signup(signup: WaitlistRequest, request: Request, db: Session = Depends(get_db)):
     """
     Add email to waitlist
     
     Features:
-    - Saves to JSON file (data/waitlist.json)
+    - Saves to PostgreSQL/SQLite database
     - Prevents duplicates
-    - Sends welcome email (TODO)
+    - Sends welcome email
     - Rate limited (5/min)
+    - Tracks IP, user agent, referrer
     """
     try:
         email = signup.email.lower()
         
-        # Load current waitlist
-        waitlist = load_waitlist()
-        
         # Check if already signed up
-        if any(entry['email'] == email for entry in waitlist):
+        existing = db.query(WaitlistEntry).filter(WaitlistEntry.email == email).first()
+        if existing:
+            total = db.query(WaitlistEntry).count()
             return WaitlistResponse(
                 success=False,
                 message="You're already on the waitlist! 🎉",
-                total_signups=len(waitlist)
+                total_signups=total
             )
         
-        # Add new signup
-        new_entry = {
-            "email": email,
-            "timestamp": datetime.now().isoformat(),
-            "ip": get_remote_address(request),
-            "user_agent": request.headers.get("user-agent", "unknown")
-        }
-        waitlist.append(new_entry)
+        # Create new entry
+        new_entry = WaitlistEntry(
+            email=email,
+            ip_address=get_remote_address(request),
+            user_agent=request.headers.get("user-agent", "unknown"),
+            referrer=request.headers.get("referer")
+        )
         
-        # Save to file
-        save_waitlist(waitlist)
+        db.add(new_entry)
+        db.commit()
+        db.refresh(new_entry)
         
         # Send welcome email (non-blocking)
         try:
-            send_welcome_email(email)
+            send_welcome_email(email, new_entry, db)
         except Exception as e:
             print(f"⚠️ Email failed: {e}")
+        
+        total = db.query(WaitlistEntry).count()
         
         return WaitlistResponse(
             success=True,
             message="Amazing! You're on the list. Check your email for confirmation!",
-            total_signups=len(waitlist)
+            total_signups=total
         )
         
     except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/waitlist/count")
-async def waitlist_count():
+async def waitlist_count(db: Session = Depends(get_db)):
     """Get total waitlist signups (public endpoint)"""
-    waitlist = load_waitlist()
+    count = db.query(WaitlistEntry).count()
     return {
-        "count": len(waitlist),
-        "timestamp": datetime.now().isoformat()
+        "count": count,
+        "timestamp": datetime.utcnow().isoformat()
     }
 
 
 @app.get("/waitlist/admin")
-async def waitlist_admin():
+async def waitlist_admin(db: Session = Depends(get_db)):
     """
     Admin dashboard - View all signups
     
     TODO: Add authentication!
     """
-    waitlist = load_waitlist()
+    all_signups = db.query(WaitlistEntry).order_by(WaitlistEntry.signup_timestamp.desc()).all()
     return {
-        "total": len(waitlist),
-        "signups": waitlist,
-        "latest_10": waitlist[-10:] if len(waitlist) > 0 else []
+        "total": len(all_signups),
+        "signups": [entry.to_dict() for entry in all_signups],
+        "latest_10": [entry.to_dict() for entry in all_signups[:10]]
     }
+
+
+# Initialize database on startup
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database tables on app startup"""
+    print("🔄 Initializing database...")
+    init_db()
+    print("✅ Database ready!")
 
 
 if __name__ == "__main__":
