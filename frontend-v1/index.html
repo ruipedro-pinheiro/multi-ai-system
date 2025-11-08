@@ -1980,32 +1980,50 @@
     <script>
         // ========== DEMO FUNCTIONS (Global scope for inline onclick) ==========
         function askHeroQuestion(question) {
-            document.getElementById('hero-input').value = question;
-            sendHeroMessage();
+            try {
+                const input = document.getElementById('hero-input');
+                if (!input) {
+                    console.error('❌ Input field not found!');
+                    return;
+                }
+                input.value = question;
+                sendHeroMessage();
+            } catch (error) {
+                console.error('❌ Error in askHeroQuestion:', error);
+                alert('Demo error. Please refresh the page.');
+            }
         }
         
         async function sendHeroMessage() {
-            const input = document.getElementById('hero-input');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            const messagesDiv = document.getElementById('hero-messages');
-            
-            // Clear welcome if first message
-            if (messagesDiv.querySelector('h4')) {
-                messagesDiv.innerHTML = '';
-            }
-            
-            // Add user message
-            addHeroMessage('user', message);
-            input.value = '';
-            
-            // Show loading
-            const loadingId = 'loading-' + Date.now();
-            addHeroMessage('system', 'Thinking...', loadingId);
-            
             try {
+                const input = document.getElementById('hero-input');
+                if (!input) {
+                    console.error('❌ Input not found');
+                    return;
+                }
+                
+                const message = input.value.trim();
+                if (!message) return;
+                
+                const messagesDiv = document.getElementById('hero-messages');
+                if (!messagesDiv) {
+                    console.error('❌ Messages container not found');
+                    return;
+                }
+            
+                // Clear welcome if first message
+                if (messagesDiv.querySelector('h4')) {
+                    messagesDiv.innerHTML = '';
+                }
+                
+                // Add user message
+                addHeroMessage('user', message);
+                input.value = '';
+                
+                // Show loading
+                const loadingId = 'loading-' + Date.now();
+                addHeroMessage('system', 'Thinking...', loadingId);
+                
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 30000);
                 
@@ -2014,47 +2032,83 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ content: message }),
                     signal: controller.signal
+                }).catch(err => {
+                    throw new Error(`Network error: ${err.message}`);
                 });
                 
                 clearTimeout(timeoutId);
                 
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                if (!response.ok) {
+                    const errorText = await response.text().catch(() => 'Unknown error');
+                    throw new Error(`Backend error (${response.status}): ${errorText}`);
+                }
                 
-                const data = await response.json();
+                const data = await response.json().catch(() => {
+                    throw new Error('Invalid JSON response from backend');
+                });
                 
                 // Remove loading
                 document.getElementById(loadingId)?.remove();
                 
                 if (!data.ai_responses || data.ai_responses.length === 0) {
-                    throw new Error('No responses');
+                    throw new Error('No AI responses received');
                 }
                 
                 // Add AI responses with delay
                 data.ai_responses.forEach((aiResp, index) => {
                     setTimeout(() => {
-                        addHeroMessage('ai', aiResp.content, null, aiResp.ai.toUpperCase());
+                        try {
+                            addHeroMessage('ai', aiResp.content, null, aiResp.ai.toUpperCase());
+                        } catch (err) {
+                            console.error('❌ Error adding AI message:', err);
+                        }
                     }, index * 400);
                 });
                 
             } catch (error) {
+                console.error('❌ Demo error:', error);
                 document.getElementById(loadingId)?.remove();
                 
                 let errorMsg = '❌ ';
                 if (error.name === 'AbortError') {
-                    errorMsg += 'Timeout (30s). Backend might be starting...';
+                    errorMsg += 'Request timeout (30s). Backend might be starting up. Try again in a moment.';
                 } else if (error.message.includes('429')) {
-                    errorMsg += 'Rate limit. Wait 1 minute.';
+                    errorMsg += 'Rate limit hit. Please wait 60 seconds and try again.';
+                } else if (error.message.includes('Network error')) {
+                    errorMsg += 'Cannot reach backend. Check your internet connection.';
+                } else if (error.message.includes('Backend error')) {
+                    errorMsg += error.message;
                 } else {
-                    errorMsg += 'Connection failed. Backend offline?';
+                    errorMsg += `Unexpected error: ${error.message}`;
                 }
                 
                 addHeroMessage('system', errorMsg);
+                
+                // Add retry button
+                const retryBtn = document.createElement('button');
+                retryBtn.textContent = '🔄 Retry';
+                retryBtn.className = 'btn btn-small';
+                retryBtn.style.marginTop = '12px';
+                retryBtn.onclick = () => {
+                    input.value = message;
+                    sendHeroMessage();
+                };
+                const messagesDiv = document.getElementById('hero-messages');
+                if (messagesDiv) {
+                    messagesDiv.appendChild(retryBtn);
+                }
             }
         }
         
         function addHeroMessage(type, content, id, aiName) {
-            const messagesDiv = document.getElementById('hero-messages');
-            const msgId = id || 'msg-' + Date.now();
+            try {
+                const messagesDiv = document.getElementById('hero-messages');
+                if (!messagesDiv) {
+                    console.error('❌ Messages container not found');
+                    return;
+                }
+                
+                const msgId = id || 'msg-' + Date.now();
             
             let html = '';
             if (type === 'user') {
@@ -2089,11 +2143,20 @@
                 </div>`;
             }
             
-            messagesDiv.insertAdjacentHTML('beforeend', html);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            
-            // Re-init Lucide icons
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+                messagesDiv.insertAdjacentHTML('beforeend', html);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                
+                // Re-init Lucide icons
+                if (typeof lucide !== 'undefined') {
+                    try {
+                        lucide.createIcons();
+                    } catch (err) {
+                        console.warn('⚠️ Lucide icons init failed:', err);
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error adding message:', error);
+            }
         }
 
         // ========== WAITLIST FORM ==========
