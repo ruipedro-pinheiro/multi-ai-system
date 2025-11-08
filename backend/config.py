@@ -6,12 +6,21 @@ from typing import Optional, List, Union
 class Settings(BaseSettings):
     """Application settings"""
     
+    # Project Info
+    project_name: str = "chika"
+    version: str = "1.0.0"
+    
     # Server
     host: str = "0.0.0.0"
     port: int = 8000
+    api_port: int = 8000
+    
+    # Rate Limiting
+    rate_limit_per_minute: int = 10
+    session_limit_per_minute: int = 5
     
     # Database
-    database_url: str = "sqlite:///./multi-ai-system.db"
+    database_url: str = "sqlite:///./chika.db"
     
     # CORS
     cors_origins: Union[List[str], str] = ["http://localhost:5173", "http://localhost:3000"]
@@ -48,9 +57,17 @@ class Settings(BaseSettings):
     
     # Qdrant Vector DB (for memory storage)
     qdrant_url: str = "http://localhost:6333"
-    qdrant_collection: str = "multi-ai-system_memory"
+    qdrant_collection: str = "chika_memory"
     
     class Config:
         env_file = ".env"
+        env_file_encoding = "utf-8"
+        extra = "allow"  # Allow extra fields from .env
+        case_sensitive = False
 
-settings = Settings()
+import os
+from pathlib import Path
+
+# Force load .env from backend directory
+env_path = Path(__file__).parent / ".env"
+settings = Settings(_env_file=str(env_path))
