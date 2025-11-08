@@ -9,7 +9,8 @@ from typing import Optional, List, Dict
 from datetime import datetime
 from sqlalchemy.orm import Session
 import os
-import resend
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
@@ -255,23 +256,22 @@ async def chat(chat_request: ChatRequest, request: Request):
 # === EMAIL HELPER === #
 
 def send_welcome_email(email: str, waitlist_entry: WaitlistEntry, db: Session):
-    """Send welcome email to new signup (async, non-blocking)"""
+    """Send welcome email to new signup via SendGrid"""
     try:
-        # Get API key from environment or config
-        api_key = os.getenv('RESEND_API_KEY')
+        # Get SendGrid API key from environment
+        api_key = os.getenv('SENDGRID_API_KEY')
         
         if not api_key:
-            print(f"⚠️ RESEND_API_KEY not set. Email not sent to {email}")
-            print(f"   To enable emails: export RESEND_API_KEY='your_key'")
+            print(f"⚠️ SENDGRID_API_KEY not set. Email not sent to {email}")
+            print(f"   To enable emails: export SENDGRID_API_KEY='your_key'")
             return
         
-        resend.api_key = api_key
-        
-        params = {
-            "from": "CHIKA <onboarding@resend.dev>",
-            "to": [email],
-            "subject": "Welcome to CHIKA Beta! 🚀",
-            "html": f"""
+        # Create email message
+        message = Mail(
+            from_email='pedroyverdon@gmail.com',  # Verified sender email
+            to_emails=email,
+            subject='Welcome to CHIKA Beta! 🚀',
+            html_content=f"""
             <html>
             <body style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <h2 style="color: #6366f1;">Welcome to CHIKA Beta! 🎉</h2>
@@ -296,16 +296,19 @@ def send_welcome_email(email: str, waitlist_entry: WaitlistEntry, db: Session):
                 </p>
                 
                 <p style="font-size: 12px; color: #999; margin-top: 40px;">
-                    You received this because you signed up on chika.dev. 
-                    <a href="mailto:pedro@chika.dev">Unsubscribe</a>
+                    You received this because you signed up on CHIKA waitlist. 
+                    <a href="mailto:pedroyverdon@gmail.com">Unsubscribe</a>
                 </p>
             </body>
             </html>
             """
-        }
+        )
         
-        email_response = resend.Emails.send(params)
-        print(f"✅ Welcome email sent to {email} (ID: {email_response['id']})")
+        # Send email
+        sg = SendGridAPIClient(api_key)
+        response = sg.send(message)
+        
+        print(f"✅ Welcome email sent to {email} (Status: {response.status_code})")
         
         # Mark as sent in database
         waitlist_entry.email_sent = True
