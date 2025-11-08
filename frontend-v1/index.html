@@ -1197,12 +1197,33 @@
                         </div>
                     </div>
                     
-                    <!-- Try It Button -->
-                    <div style="text-align: center; padding-top: var(--space-sm); border-top: 1px solid var(--bg-hover);">
-                        <button class="btn btn-primary" onclick="openChat()" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                            <i data-lucide="play-circle" style="width: 20px; height: 20px;"></i>
-                            Try It Yourself - Ask Anything
-                        </button>
+                    <!-- Interactive Input -->
+                    <div style="padding-top: var(--space-sm); border-top: 1px solid var(--bg-hover);">
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <input 
+                                type="text" 
+                                id="hero-prompt-input"
+                                placeholder="Ask me anything... (e.g., 'Explain quantum computing simply')"
+                                style="flex: 1; background: var(--bg-input); border: 2px solid var(--bg-hover); border-radius: 12px; padding: 14px 20px; color: var(--text-primary); font-size: 1rem; transition: all 0.2s;"
+                                onfocus="this.style.borderColor='var(--chika-primary)'"
+                                onblur="this.style.borderColor='var(--bg-hover)'"
+                                onkeypress="if(event.key==='Enter') openChatWithPrompt()"
+                            />
+                            <button 
+                                onclick="openChatWithPrompt()" 
+                                class="btn btn-primary"
+                                style="padding: 14px 28px; display: flex; align-items: center; gap: 8px; white-space: nowrap;"
+                            >
+                                <i data-lucide="send" style="width: 18px; height: 18px;"></i>
+                                Ask AI
+                            </button>
+                        </div>
+                        <div style="text-align: center; margin-top: 12px;">
+                            <span style="font-size: 0.875rem; color: var(--text-muted);">
+                                <i data-lucide="zap" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; color: var(--chika-accent);"></i>
+                                Live demo • Real AIs • Instant response
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2044,8 +2065,31 @@
 
         // ========== CHAT DEMO ==========
         function openChat() {
-            document.getElementById('chat-demo').classList.add('active');
+            document.getElementById('chat-demo').style.display = 'flex';
             document.getElementById('chat-input').focus();
+        }
+        
+        function openChatWithPrompt() {
+            const promptInput = document.getElementById('hero-prompt-input');
+            const prompt = promptInput.value.trim();
+            
+            if (prompt) {
+                // Open modal
+                document.getElementById('chat-demo').style.display = 'flex';
+                
+                // Set the prompt in the chat input
+                const chatInput = document.getElementById('chat-input');
+                chatInput.value = prompt;
+                
+                // Auto-send after a brief delay
+                setTimeout(() => {
+                    sendMessage();
+                    promptInput.value = ''; // Clear hero input
+                }, 100);
+            } else {
+                // Just open if empty
+                openChat();
+            }
         }
 
         function closeChat() {
