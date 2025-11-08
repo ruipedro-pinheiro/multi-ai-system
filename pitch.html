@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIKA - Multi-AI Collaboration Platform</title>
+    <style>
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #141824;
+            --text: #e8e9ed;
+            --text-dim: #9a9ca5;
+            --accent: #00d9ff;
+            --accent-dim: #0099cc;
+            --border: #1e2330;
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --error: #ff4444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, #0a0e1a 0%, #141824 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--success) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero .tagline {
+            font-size: 1.5rem;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+        }
+        
+        .hero .flag {
+            font-size: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        section {
+            padding: 4rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--accent);
+        }
+        
+        h3 {
+            font-size: 1.8rem;
+            margin: 2rem 0 1rem;
+            color: var(--text);
+        }
+        
+        .problem-box {
+            background: var(--bg-card);
+            border-left: 4px solid var(--error);
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+        
+        .solution-box {
+            background: var(--bg-card);
+            border-left: 4px solid var(--success);
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+        
+        .code-example {
+            background: #000;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .conversation {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .message {
+            margin: 1rem 0;
+            padding: 1rem;
+            border-radius: 8px;
+            background: rgba(0, 217, 255, 0.05);
+            border-left: 3px solid var(--accent);
+        }
+        
+        .message.user {
+            background: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--text-dim);
+        }
+        
+        .message .author {
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        
+        .message.user .author {
+            color: var(--text);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .feature-card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent);
+        }
+        
+        .feature-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .comparison-table th {
+            background: rgba(0, 217, 255, 0.1);
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .comparison-table td:first-child {
+            font-weight: 600;
+        }
+        
+        .check {
+            color: var(--success);
+            font-weight: bold;
+        }
+        
+        .cross {
+            color: var(--error);
+            font-weight: bold;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .pricing-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        
+        .pricing-card:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--accent);
+            position: relative;
+        }
+        
+        .pricing-card.featured::before {
+            content: "POPULAIRE";
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: var(--accent);
+            color: var(--bg-dark);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .pricing-card h3 {
+            margin-top: 0;
+        }
+        
+        .price {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--accent);
+            margin: 1rem 0;
+        }
+        
+        .price-unit {
+            font-size: 1rem;
+            color: var(--text-dim);
+        }
+        
+        .features-list {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        .features-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .features-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: bold;
+        }
+        
+        .cta {
+            background: var(--accent);
+            color: var(--bg-dark);
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .cta:hover {
+            background: var(--accent-dim);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-dim);
+            border-top: 1px solid var(--border);
+        }
+        
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .tech-badge {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero .tagline {
+                font-size: 1.2rem;
+            }
+            
+            h2 {
+                font-size: 2rem;
+            }
+            
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero -->
+    <div class="hero">
+        <h1>CHIKA</h1>
+        <p class="tagline">Multi-AI Collaboration Platform</p>
+        <p class="flag">🇨🇭</p>
+        <p style="margin-top: 1rem; color: var(--text-dim);">Utiliser plusieurs IA sans chichi. Elles collaborent, se souviennent de tout, et tu gardes le contrôle.</p>
+    </div>
+
+    <!-- Problem -->
+    <section id="problem">
+        <div class="container">
+            <h2>🔥 Le Problème</h2>
+            
+            <div class="problem-box">
+                <h3>Aujourd'hui, utiliser plusieurs IA = bordel</h3>
+                <ul style="margin-top: 1rem; line-height: 2;">
+                    <li>❌ Elles ne se parlent PAS entre elles</li>
+                    <li>❌ Tu dois copier-coller partout</li>
+                    <li>❌ Elles oublient ton historique</li>
+                    <li>❌ Tu payes 40€/mois pour des outils fragmentés</li>
+                </ul>
+            </div>
+
+            <div class="conversation">
+                <div class="message user">
+                    <div class="author">👤 Toi sur Claude.ai</div>
+                    <div>"Écris-moi un script Python backup DB"</div>
+                </div>
+                <div class="message">
+                    <div class="author">🤖 Claude</div>
+                    <div>Voici le script... ✅</div>
+                </div>
+                
+                <div class="message user" style="margin-top: 2rem;">
+                    <div class="author">👤 Toi sur ChatGPT</div>
+                    <div>"Vérifie si c'est RGPD compliant"</div>
+                </div>
+                <div class="message">
+                    <div class="author">🧠 ChatGPT</div>
+                    <div>❌ Quel script? Je ne sais pas de quoi tu parles...<br>→ Tu dois copier-coller le code de Claude → CHIANT!</div>
+                </div>
+
+                <div class="message user" style="margin-top: 2rem;">
+                    <div class="author">👤 Toi retourne sur Claude 2 jours après</div>
+                    <div>"Améliore le script"</div>
+                </div>
+                <div class="message">
+                    <div class="author">🤖 Claude</div>
+                    <div>❌ J'ai oublié (nouvelle session)...<br>→ Tu dois tout ré-expliquer → PERTE DE TEMPS!</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution -->
+    <section id="solution">
+        <div class="container">
+            <h2>💡 La Solution: CHIKA</h2>
+            
+            <div class="solution-box">
+                <h3>Une plateforme qui fait collaborer tes IA comme une vraie équipe</h3>
+            </div>
+
+            <div class="conversation">
+                <div class="message user">
+                    <div class="author">👤 Toi</div>
+                    <div>"J'ai besoin d'un script Python avec crontab pour backup DB"</div>
+                </div>
+
+                <div style="padding: 1rem; background: rgba(0, 217, 255, 0.1); border-radius: 8px; margin: 1rem 0;">
+                    <strong style="color: var(--accent);">⚡ CHIKA analyse automatiquement:</strong><br>
+                    → "script Python" = besoin expert CODE<br>
+                    → "crontab" = besoin expert SYSADMIN<br>
+                    → "backup" = besoin vérif RGPD
+                </div>
+
+                <div class="message">
+                    <div class="author">🤖 Claude (Expert Code)</div>
+                    <div>Ok! Je fais le script.<br>@Gemini vérifie RGPD?<br>@ChatGPT alternatives créatives?</div>
+                </div>
+
+                <div class="message">
+                    <div class="author">✨ Gemini (Expert Legal)</div>
+                    <div>RGPD OK si chiffrement AES-256 + rétention <30j</div>
+                </div>
+
+                <div class="message">
+                    <div class="author">🧠 ChatGPT (Expert Créatif)</div>
+                    <div>Alternative: utilise systemd timer au lieu de cron (meilleur logging)</div>
+                </div>
+
+                <div class="message">
+                    <div class="author">🤖 Claude</div>
+                    <div><strong>@Pedro Voici ton script:</strong><br>
+                    ✅ Backup auto chiffré (RGPD compliant)<br>
+                    ✅ systemd timer (plus moderne)<br>
+                    Code prêt à utiliser!</div>
+                </div>
+            </div>
+
+            <p style="text-align: center; font-size: 1.3rem; color: var(--success); margin-top: 2rem;">
+                <strong>Résultat:</strong> 1 question → 3 IA collaborent → Meilleure solution possible!
+            </p>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features">
+        <div class="container">
+            <h2>🎯 Ce Qui Rend CHIKA Unique</h2>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon">🧠</div>
+                    <h3>SmartRouter</h3>
+                    <p>Tu ne choisis PAS quelle IA utiliser. CHIKA analyse ton message et sélectionne les meilleures automatiquement.</p>
+                    <div class="code-example" style="margin-top: 1rem; font-size: 0.8rem;">
+"Code Python bug" → Claude<br>
+"RGPD compliance" → Gemini<br>
+"Blog créatif" → ChatGPT<br>
+"Script + RGPD + alternatives" → Les 3!
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon">🤝</div>
+                    <h3>Collaboration Native</h3>
+                    <p>Les IA discutent entre elles comme une vraie équipe:</p>
+                    <ul style="margin-top: 1rem;">
+                        <li>Claude propose du code</li>
+                        <li>Gemini vérifie la sécurité</li>
+                        <li>ChatGPT suggère améliorations</li>
+                        <li>Discussion jusqu'à consensus</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon">💾</div>
+                    <h3>Mémoire Illimitée</h3>
+                    <p><strong>ChatGPT/Claude:</strong> Oublient après X messages</p>
+                    <p style="margin-top: 1rem;"><strong style="color: var(--success);">CHIKA PRO:</strong> N'oublie JAMAIS!</p>
+                    <div class="code-example" style="margin-top: 1rem; font-size: 0.8rem;">
+Jour 1: "Script backup DB"<br>
+Jour 30: "Améliore le script"<br>
+→ CHIKA SE SOUVIENT! ✅
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon">🔐</div>
+                    <h3>Tu Gardes le Contrôle</h3>
+                    <p><strong>Freemium:</strong> Nos IA gratuites</p>
+                    <p style="margin-top: 1rem;"><strong>PRO:</strong> TES IA!</p>
+                    <ul style="margin-top: 1rem;">
+                        <li>Ton Claude Max (OAuth)</li>
+                        <li>Ton ChatGPT Plus (API)</li>
+                        <li>N'importe quelle IA</li>
+                    </ul>
+                    <p style="margin-top: 1rem; color: var(--text-dim); font-size: 0.9rem;">Privacy: Tes clés = tes données</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison -->
+    <section id="comparison">
+        <div class="container">
+            <h2>🚀 Différence vs Concurrence</h2>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>ChatGPT Plus</th>
+                        <th>Claude Pro</th>
+                        <th style="color: var(--accent);">CHIKA PRO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Prix</td>
+                        <td>20€/mois</td>
+                        <td>20€/mois</td>
+                        <td><strong>20€/mois</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Multi-IA</td>
+                        <td><span class="cross">❌</span> GPT seul</td>
+                        <td><span class="cross">❌</span> Claude seul</td>
+                        <td><span class="check">✅</span> <strong>TES IA</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Collaboration</td>
+                        <td><span class="cross">❌</span></td>
+                        <td><span class="cross">❌</span></td>
+                        <td><span class="check">✅</span> <strong>Native</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Contexte</td>
+                        <td>~32K tokens</td>
+                        <td>~200K tokens</td>
+                        <td><span class="check">✅</span> <strong>ILLIMITÉ</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Mémoire</td>
+                        <td><span class="cross">❌</span> Oublie</td>
+                        <td>⚠️ Par projet</td>
+                        <td><span class="check">✅</span> <strong>Globale</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Privacy</td>
+                        <td><span class="cross">❌</span> Cloud</td>
+                        <td><span class="cross">❌</span> Cloud</td>
+                        <td><span class="check">✅</span> <strong>TES clés</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing">
+        <div class="container">
+            <h2>💰 Pricing</h2>
+
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>FREEMIUM</h3>
+                    <div class="price">0€</div>
+                    <ul class="features-list">
+                        <li>Gemini 2.0 Flash (gratuit)</li>
+                        <li>Llama 3.1 70B (gratuit)</li>
+                        <li>Mixtral 8x7B (gratuit)</li>
+                        <li>Multi-IA collaboration</li>
+                        <li style="color: var(--text-dim);">Contexte limité: 50 messages</li>
+                    </ul>
+                    <button class="cta" style="background: var(--border); cursor: not-allowed;">Bientôt</button>
+                </div>
+
+                <div class="pricing-card featured">
+                    <h3>PRO</h3>
+                    <div class="price">20€<span class="price-unit">/mois</span></div>
+                    <ul class="features-list">
+                        <li>Connecte TES IA (OAuth/API)</li>
+                        <li>Claude, ChatGPT, Gemini, etc.</li>
+                        <li>Mémoire ILLIMITÉE</li>
+                        <li>Sessions illimitées</li>
+                        <li>Settings avancés</li>
+                        <li>Support prioritaire</li>
+                    </ul>
+                    <button class="cta">Rejoindre Waitlist</button>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>ENTERPRISE</h3>
+                    <div class="price">Custom</div>
+                    <ul class="features-list">
+                        <li>Self-hosted (ta propre infra)</li>
+                        <li>SSO/SAML</li>
+                        <li>Custom branding</li>
+                        <li>Support dédié</li>
+                        <li>SLA garanti</li>
+                        <li>Onboarding personnalisé</li>
+                    </ul>
+                    <button class="cta">Contact</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack -->
+    <section id="tech">
+        <div class="container">
+            <h2>🏗️ Stack Technique</h2>
+
+            <h3>Backend</h3>
+            <div class="tech-stack">
+                <span class="tech-badge">FastAPI (Python)</span>
+                <span class="tech-badge">SQLAlchemy + PostgreSQL</span>
+                <span class="tech-badge">LiteLLM (100+ providers)</span>
+                <span class="tech-badge">OAuth2</span>
+                <span class="tech-badge">WebSocket</span>
+            </div>
+
+            <h3>AI Orchestration</h3>
+            <div class="tech-stack">
+                <span class="tech-badge">SmartRouter (intent analysis)</span>
+                <span class="tech-badge">AICollaborator (coordination)</span>
+                <span class="tech-badge">AI Personas (identity system)</span>
+                <span class="tech-badge">Context Manager (unlimited memory)</span>
+            </div>
+
+            <h3>Frontend</h3>
+            <div class="tech-stack">
+                <span class="tech-badge">Vanilla JS</span>
+                <span class="tech-badge">Design System Custom</span>
+                <span class="tech-badge">WebSocket Real-time</span>
+            </div>
+
+            <h3>Infrastructure</h3>
+            <div class="tech-stack">
+                <span class="tech-badge">Docker Compose</span>
+                <span class="tech-badge">Qdrant (Vector DB)</span>
+                <span class="tech-badge">Self-hostable</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="cta" style="text-align: center; padding: 5rem 2rem;">
+        <div class="container">
+            <h2 style="font-size: 3rem; margin-bottom: 1rem;">Prêt à essayer?</h2>
+            <p style="font-size: 1.3rem; color: var(--text-dim); margin-bottom: 2rem;">
+                Rejoins la waitlist et sois parmi les premiers à tester CHIKA
+            </p>
+            <button class="cta" style="font-size: 1.3rem; padding: 1.2rem 3rem;">
+                Rejoindre la Waitlist
+            </button>
+            <p style="margin-top: 2rem; color: var(--text-dim);">
+                Ou explore le code sur <a href="https://github.com/ruipedro-pinheiro/multi-ai-system" style="color: var(--accent);">GitHub</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p><strong>CHIKA</strong> - Utiliser plusieurs IA sans chichi 🇨🇭</p>
+            <p style="margin-top: 1rem;">
+                <a href="https://github.com/ruipedro-pinheiro/multi-ai-system" style="color: var(--accent); margin: 0 1rem;">GitHub</a>
+                <a href="mailto:pedro@chika.app" style="color: var(--accent); margin: 0 1rem;">Contact</a>
+            </p>
+            <p style="margin-top: 2rem; font-size: 0.9rem;">
+                Made with 🇨🇭 precision in Lausanne
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
