@@ -413,6 +413,21 @@ async def waitlist_admin(db: Session = Depends(get_db)):
     }
 
 
+@app.post("/waitlist/admin/resend-all")
+async def resend_all_emails(background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Resend emails to everyone who hasn't received one yet"""
+    pending = db.query(WaitlistEntry).filter(WaitlistEntry.email_sent == False).all()
+    
+    for entry in pending:
+        background_tasks.add_task(send_welcome_email, entry.email, entry.id, db)
+    
+    return {
+        "success": True,
+        "queued": len(pending),
+        "emails": [e.email for e in pending]
+    }
+
+
 # Initialize database on startup
 @app.on_event("startup")
 async def startup_event():
