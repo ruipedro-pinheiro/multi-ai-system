@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHIKA Waitlist Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .stat-card {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 12px;
+            border-left: 4px solid #6366f1;
+        }
+        
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #10b981;
+        }
+        
+        .stat-label {
+            color: #cbd5e1;
+            margin-top: 10px;
+        }
+        
+        .signups-table {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 30px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 2px solid #6366f1;
+            color: #6366f1;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #334155;
+        }
+        
+        tr:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .refresh-btn:hover {
+            opacity: 0.9;
+        }
+        
+        .timestamp {
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #64748b;
+        }
+        
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid #ef4444;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 CHIKA Waitlist Admin</h1>
+        <p style="color: #cbd5e1; margin-bottom: 30px;">Real-time dashboard of beta signups</p>
+        
+        <button class="refresh-btn" onclick="loadWaitlist()">🔄 Refresh Data</button>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="total-signups">-</div>
+                <div class="stat-label">Total Signups</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="today-signups">-</div>
+                <div class="stat-label">Signups Today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avg-per-day">-</div>
+                <div class="stat-label">Avg/Day</div>
+            </div>
+        </div>
+        
+        <div class="signups-table">
+            <h2 style="margin-bottom: 20px;">Recent Signups</h2>
+            <div id="table-container"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'https://chika-backend-r3ue.onrender.com';
+        
+        async function loadWaitlist() {
+            const container = document.getElementById('table-container');
+            container.innerHTML = '<div class="loading">Loading...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/waitlist/admin`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Update stats
+                document.getElementById('total-signups').textContent = data.total;
+                
+                // Calculate today's signups
+                const today = new Date().toISOString().split('T')[0];
+                const todaySignups = data.signups.filter(s => 
+                    s.timestamp.startsWith(today)
+                ).length;
+                document.getElementById('today-signups').textContent = todaySignups;
+                
+                // Calculate avg per day
+                if (data.signups.length > 0) {
+                    const firstSignup = new Date(data.signups[0].timestamp);
+                    const daysSinceFirst = Math.max(1, Math.ceil((Date.now() - firstSignup) / (1000 * 60 * 60 * 24)));
+                    const avgPerDay = (data.total / daysSinceFirst).toFixed(1);
+                    document.getElementById('avg-per-day').textContent = avgPerDay;
+                } else {
+                    document.getElementById('avg-per-day').textContent = '0';
+                }
+                
+                // Build table
+                if (data.signups.length === 0) {
+                    container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 40px;">No signups yet</p>';
+                    return;
+                }
+                
+                let tableHtml = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Email</th>
+                                <th>Timestamp</th>
+                                <th>IP</th>
+                                <th>User Agent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                data.signups.reverse().forEach((signup, index) => {
+                    const timestamp = new Date(signup.timestamp).toLocaleString();
+                    tableHtml += `
+                        <tr>
+                            <td>${data.total - index}</td>
+                            <td><strong>${signup.email}</strong></td>
+                            <td class="timestamp">${timestamp}</td>
+                            <td class="timestamp">${signup.ip}</td>
+                            <td class="timestamp">${signup.user_agent.substring(0, 40)}...</td>
+                        </tr>
+                    `;
+                });
+                
+                tableHtml += `
+                        </tbody>
+                    </table>
+                `;
+                
+                container.innerHTML = tableHtml;
+                
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="error">
+                        <strong>❌ Error loading waitlist</strong><br>
+                        ${error.message}<br><br>
+                        <small>Make sure backend is running on ${API_URL}</small>
+                    </div>
+                `;
+            }
+        }
+        
+        // Load on page load
+        loadWaitlist();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadWaitlist, 30000);
+    </script>
+</body>
+</html>
