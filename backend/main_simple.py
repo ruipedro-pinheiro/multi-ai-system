@@ -265,13 +265,27 @@ def send_welcome_email(email: str, entry_id: int):
     from database import SessionLocal
     import sib_api_v3_sdk
     from sib_api_v3_sdk.rest import ApiException
+    import logging
+    import traceback
+    
+    # Setup logging to file
+    logging.basicConfig(
+        filename="/tmp/chika_email.log",
+        level=logging.INFO,
+        format="%(asctime)s - %(message)s"
+    )
+    
+    logging.info(f"🚀 Background task started for {email}")
+    
     db = SessionLocal()
     
     try:
         # Brevo credentials from environment
         brevo_api_key = os.getenv('BREVO_API_KEY')
+        logging.info(f"API Key present: {bool(brevo_api_key)}")
         
         if not brevo_api_key:
+            logging.warning(f"⚠️ Brevo not configured. Email not sent to {email}")
             print(f"⚠️ Brevo not configured. Email not sent to {email}")
             db.close()
             return
@@ -313,17 +327,19 @@ def send_welcome_email(email: str, entry_id: int):
         configuration.api_key['api-key'] = brevo_api_key
         api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
         
-        # Create email
+        # Create email (using verified sender)
         send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
             to=[{"email": email}],
-            sender={"name": "CHIKA", "email": "noreply@chika.app"},
+            sender={"name": "CHIKA", "email": "pedroyverdon@gmail.com"},
             subject="Welcome to CHIKA Beta! 🚀",
             html_content=html
         )
         
         # Send via Brevo API
+        logging.info(f"📧 Sending email to {email} via Brevo...")
         print(f"📧 Sending email to {email} via Brevo...")
-        api_instance.send_transac_email(send_smtp_email)
+        result = api_instance.send_transac_email(send_smtp_email)
+        logging.info(f"Brevo response: {result}")
         
         print(f"✅ Welcome email sent to {email} via Brevo")
         
@@ -335,6 +351,8 @@ def send_welcome_email(email: str, entry_id: int):
             db.commit()
         
     except Exception as e:
+        logging.error(f"❌ Email failed for {email}: {e}")
+        logging.error(f"Traceback: {traceback.format_exc()}")
         print(f"❌ Email failed for {email}: {e}")
     finally:
         db.close()

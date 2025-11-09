@@ -11,7 +11,7 @@ from datetime import datetime
 
 # Config & Models
 from config import settings
-from models.room import init_db, get_db, Room as DBRoom, Message as DBMessage
+from models.room import init_db, get_db, Room as DBRoom, Message as DBMessage, DemoSession
 from providers.llm_router import LLMRouter
 from room.manager import RoomManager
 
@@ -56,6 +56,31 @@ oauth_refresher = OAuthRefresher(oauth_manager, token_store)
 
 # Initialize LLM Router with OAuth support
 llm_router = LLMRouter(token_store=token_store, oauth_refresher=oauth_refresher)
+
+
+# === Health Check Endpoint === #
+
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint for frontend monitoring
+    
+    Returns available AI providers and backend status
+    """
+    try:
+        available_ais = llm_router.get_available_providers()
+        return {
+            "status": "online",
+            "available_ais": available_ais,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        return {
+            "status": "degraded",
+            "available_ais": [],
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }
 
 
 # === Pydantic Models === #
@@ -542,6 +567,12 @@ async def oauth_status():
         "providers": status,
         "authenticated_providers": authenticated_providers
     }
+
+
+# === DEMO ROUTES === #
+# Import demo router
+from routes.demo import router as demo_router
+app.include_router(demo_router)
 
 
 if __name__ == "__main__":
